@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:login_bloc/presentation/login_screen/login_screen.dart';
+import 'package:login_bloc/utils/theme/theme.dart';
 
 class App extends StatelessWidget {
   const App({super.key});
@@ -7,12 +8,9 @@ class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
-      home: const LoginScreen(),
+      debugShowCheckedModeBanner: false,
+      theme: CTheme.themeData,
+      home: LoginScreen(),
     );
   }
 }
