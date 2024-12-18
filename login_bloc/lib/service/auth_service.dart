@@ -10,6 +10,25 @@ class AuthService {
     String res = '';
     try {
       if (email.isNotEmpty || password.isNotEmpty) {
+        await _auth.signInWithEmailAndPassword(
+          email: email,
+          password: password,
+        );
+        res = 'sucess';
+      }
+    } catch (e) {
+      res = e.toString();
+    }
+    return res;
+  }
+
+  Future<String> createUser({
+    required String email,
+    required String password,
+  }) async {
+    String res = '';
+    try {
+      if (email.isNotEmpty || password.isNotEmpty) {
         UserCredential userCredential =
             await _auth.createUserWithEmailAndPassword(
           email: email,

@@ -1,34 +1,58 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:login_bloc/presentation/login_screen/bloc/login_bloc.dart';
+import 'package:login_bloc/presentation/signup_screen/signup_screen.dart';
+import 'package:login_bloc/utils/helper/helper.dart';
 
 class LoginScreen extends StatelessWidget {
   LoginScreen({super.key});
-
+  final Helper _helper = Helper();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 30),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Flexible(flex: 1, child: Container()),
-              _loginText(context),
-              const SizedBox(height: 20),
-              _emailTextField(context),
-              const SizedBox(height: 20),
-              _passwordTextField(context),
-              const SizedBox(height: 20),
-              _loginButton(context),
-              Flexible(flex: 1, child: Container()),
-              _signUpScreenButton(context),
-              const SizedBox(height: 20),
-            ],
+    return BlocConsumer<LoginBloc, LoginState>(
+      listener: (context, state) {
+        if (state is NavigationToSignUpScreen) {
+          _helper.navigationPush(context, const SignupScreen());
+        } else if (state is LoginFailure) {
+          _helper.showSnackBar(context, state.error);
+        }
+      },
+      builder: (context, state) {
+        if (state is LoginLoading) {
+          return const Scaffold(
+            body: Center(
+              child: CircularProgressIndicator(
+                color: Colors.black,
+              ),
+            ),
+          );
+        }
+        return Scaffold(
+          body: Center(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 30),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Flexible(flex: 1, child: Container()),
+                  _loginText(context),
+                  const SizedBox(height: 20),
+                  _emailTextField(context),
+                  const SizedBox(height: 20),
+                  _passwordTextField(context),
+                  const SizedBox(height: 20),
+                  _loginButton(context),
+                  Flexible(flex: 1, child: Container()),
+                  _signUpScreenButton(context),
+                  const SizedBox(height: 20),
+                ],
+              ),
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
@@ -77,6 +101,9 @@ class LoginScreen extends StatelessWidget {
           width: 10,
         ),
         GestureDetector(
+          onTap: () {
+            context.read<LoginBloc>().add(SignUpButtonClicked());
+          },
           child: Text(
             "Sign up",
             style: Theme.of(context).textTheme.bodySmall,
