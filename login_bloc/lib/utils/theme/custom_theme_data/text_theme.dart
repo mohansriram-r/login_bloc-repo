@@ -36,17 +36,17 @@ class CTextTheme {
     ),
     labelLarge: const TextStyle().copyWith(
       color: Colors.black,
-      fontSize: 12,
+      fontSize: 14,
       fontWeight: FontWeight.w700,
     ),
     labelMedium: const TextStyle().copyWith(
       color: Colors.black,
-      fontSize: 12,
+      fontSize: 14,
       fontWeight: FontWeight.w600,
     ),
     labelSmall: const TextStyle().copyWith(
       color: Colors.black,
-      fontSize: 12,
+      fontSize: 14,
       fontWeight: FontWeight.w400,
     ),
   );

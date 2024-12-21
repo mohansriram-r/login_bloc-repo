@@ -27,13 +27,13 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     Emitter<LoginState> emit,
   ) async {
     emit(LoginLoading());
-    String res = await _authService.createUser(
+    String res = await _authService.login(
       email: event.email,
       password: event.password,
     );
 
     if (res == 'sucess') {
-      emit(LoginLoading());
+      emit(LoginSucess());
     } else {
       emit(LoginFailure(error: res));
     }

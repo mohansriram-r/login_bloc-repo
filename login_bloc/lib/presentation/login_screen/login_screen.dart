@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:login_bloc/presentation/custom_wideget/text_field.dart';
+import 'package:login_bloc/presentation/home_screen/home_screen.dart';
 import 'package:login_bloc/presentation/login_screen/bloc/login_bloc.dart';
 import 'package:login_bloc/presentation/signup_screen/signup_screen.dart';
 import 'package:login_bloc/utils/helper/helper.dart';
@@ -14,9 +16,11 @@ class LoginScreen extends StatelessWidget {
     return BlocConsumer<LoginBloc, LoginState>(
       listener: (context, state) {
         if (state is NavigationToSignUpScreen) {
-          _helper.navigationPush(context, const SignupScreen());
+          _helper.navigationPush(context, SignupScreen());
         } else if (state is LoginFailure) {
           _helper.showSnackBar(context, state.error);
+        } else if (state is LoginSucess) {
+          _helper.navigationPushReplacement(context, const HomeScreen());
         }
       },
       builder: (context, state) {
@@ -37,15 +41,55 @@ class LoginScreen extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Flexible(flex: 1, child: Container()),
-                  _loginText(context),
+                  Text(
+                    "Login",
+                    style: Theme.of(context).textTheme.headlineLarge,
+                  ),
                   const SizedBox(height: 20),
-                  _emailTextField(context),
+                  CTextField(
+                    emailController: _emailController,
+                    hintText: "Email",
+                  ),
                   const SizedBox(height: 20),
-                  _passwordTextField(context),
+                  CTextField(
+                    emailController: _passwordController,
+                    hintText: "Password",
+                    isPass: true,
+                  ),
                   const SizedBox(height: 20),
-                  _loginButton(context),
+                  ElevatedButton(
+                    onPressed: () {
+                      context.read<LoginBloc>().add(
+                            LoginButtonClicked(
+                              email: _emailController.text,
+                              password: _passwordController.text,
+                            ),
+                          );
+                    },
+                    child: const Text("Login"),
+                  ),
                   Flexible(flex: 1, child: Container()),
-                  _signUpScreenButton(context),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        "Don't Have a Account?",
+                        style: Theme.of(context).textTheme.labelSmall,
+                      ),
+                      const SizedBox(
+                        width: 10,
+                      ),
+                      GestureDetector(
+                        onTap: () {
+                          context.read<LoginBloc>().add(SignUpButtonClicked());
+                        },
+                        child: Text(
+                          "Sign up",
+                          style: Theme.of(context).textTheme.labelSmall,
+                        ),
+                      )
+                    ],
+                  ),
                   const SizedBox(height: 20),
                 ],
               ),
@@ -53,63 +97,6 @@ class LoginScreen extends StatelessWidget {
           ),
         );
       },
-    );
-  }
-
-  Widget _loginText(BuildContext context) {
-    return Text(
-      "Login",
-      style: Theme.of(context).textTheme.headlineLarge,
-    );
-  }
-
-  Widget _emailTextField(BuildContext context) {
-    return TextField(
-      controller: _emailController,
-      decoration: InputDecoration(
-        hintText: "Email",
-        hintStyle: Theme.of(context).textTheme.labelSmall,
-        filled: true,
-      ),
-    );
-  }
-
-  Widget _passwordTextField(BuildContext context) {
-    return TextField(
-      controller: _passwordController,
-      decoration: InputDecoration(
-        hintText: "Password",
-        filled: true,
-        hintStyle: Theme.of(context).textTheme.labelSmall,
-      ),
-    );
-  }
-
-  Widget _loginButton(BuildContext context) {
-    return ElevatedButton(onPressed: () {}, child: const Text("Login"));
-  }
-
-  Widget _signUpScreenButton(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Text(
-          "Don't Have a Account?",
-          style: Theme.of(context).textTheme.bodySmall,
-        ),
-        const SizedBox(
-          width: 10,
-        ),
-        GestureDetector(
-          onTap: () {
-            context.read<LoginBloc>().add(SignUpButtonClicked());
-          },
-          child: Text(
-            "Sign up",
-            style: Theme.of(context).textTheme.bodySmall,
-          ),
-        )
-      ],
     );
   }
 }

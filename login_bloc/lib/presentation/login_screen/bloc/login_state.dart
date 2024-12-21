@@ -15,3 +15,5 @@ final class LoginFailure extends LoginState {
 }
 
 final class NavigationToSignUpScreen extends LoginState {}
+
+final class PasswordVisible extends LoginState {}
