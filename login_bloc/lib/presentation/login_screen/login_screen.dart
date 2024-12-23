@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:login_bloc/presentation/custom_wideget/text_field.dart';
+import 'package:login_bloc/presentation/forgot_password/forgot_password.dart';
 import 'package:login_bloc/presentation/home_screen/home_screen.dart';
 import 'package:login_bloc/presentation/login_screen/bloc/login_bloc.dart';
 import 'package:login_bloc/presentation/signup_screen/signup_screen.dart';
@@ -21,6 +22,8 @@ class LoginScreen extends StatelessWidget {
           _helper.showSnackBar(context, state.error);
         } else if (state is LoginSucess) {
           _helper.navigationPushReplacement(context, const HomeScreen());
+        } else if (state is ForgotPasswordState) {
+          _helper.navigationPush(context, const ForgotPassword());
         }
       },
       builder: (context, state) {
@@ -55,6 +58,22 @@ class LoginScreen extends StatelessWidget {
                     emailController: _passwordController,
                     hintText: "Password",
                     isPass: true,
+                  ),
+                  const SizedBox(height: 10),
+                  Align(
+                    alignment: Alignment.bottomRight,
+                    child: GestureDetector(
+                      onTap: () {
+                        context
+                            .read<LoginBloc>()
+                            .add(ForgotPasswordButtonClicked());
+                      },
+                      child: Text(
+                        "Forgot Password?",
+                        style: Theme.of(context).textTheme.labelSmall,
+                        textAlign: TextAlign.end,
+                      ),
+                    ),
                   ),
                   const SizedBox(height: 20),
                   ElevatedButton(

@@ -14,7 +14,10 @@ class AuthService {
           email: email,
           password: password,
         );
+
         res = 'sucess';
+      } else {
+        res = 'Fill all the fields';
       }
     } catch (e) {
       res = e.toString();
@@ -35,6 +38,8 @@ class AuthService {
           password: password,
         );
         res = 'sucess';
+      }else {
+        res = 'Fill all the fields';
       }
     } catch (e) {
       res = e.toString();

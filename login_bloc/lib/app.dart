@@ -23,7 +23,7 @@ class App extends StatelessWidget {
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         theme: CTheme.themeData,
-        home: SignupScreen(),
+        home: LoginScreen(),
       ),
     );
   }

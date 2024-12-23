@@ -13,6 +13,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
   LoginBloc() : super(LoginInitial()) {
     on<SignUpButtonClicked>(_navigationToSignUpScreen);
     on<LoginButtonClicked>(_loginButtonClicked);
+    on<ForgotPasswordButtonClicked>(_forgotPasswordButtonClicked);
   }
 
   FutureOr<void> _navigationToSignUpScreen(
@@ -20,6 +21,13 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     Emitter<LoginState> emit,
   ) {
     emit(NavigationToSignUpScreen());
+  }
+
+  FutureOr<void> _forgotPasswordButtonClicked(
+    ForgotPasswordButtonClicked event,
+    Emitter<LoginState> emit,
+  ) {
+    emit(ForgotPasswordState());
   }
 
   FutureOr<void> _loginButtonClicked(
