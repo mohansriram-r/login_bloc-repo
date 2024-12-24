@@ -12,3 +12,5 @@ final class LoginButtonClicked extends LoginEvent {
 final class SignUpButtonClicked extends LoginEvent {}
 
 final class ForgotPasswordButtonClicked extends LoginEvent {}
+
+final class GoogleSignInButtonClicked extends LoginEvent {}

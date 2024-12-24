@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:login_bloc/presentation/custom_wideget/text_field.dart';
 import 'package:login_bloc/presentation/forgot_password/forgot_password.dart';
 import 'package:login_bloc/presentation/home_screen/home_screen.dart';
 import 'package:login_bloc/presentation/login_screen/bloc/login_bloc.dart';
 import 'package:login_bloc/presentation/signup_screen/signup_screen.dart';
+import 'package:login_bloc/utils/constant/string.dart';
 import 'package:login_bloc/utils/helper/helper.dart';
 
 class LoginScreen extends StatelessWidget {
@@ -86,6 +88,45 @@ class LoginScreen extends StatelessWidget {
                           );
                     },
                     child: const Text("Login"),
+                  ),
+                  const SizedBox(height: 20),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Container(
+                          margin: const EdgeInsets.only(left: 10, right: 10),
+                          child: const Divider(
+                            color: Colors.black,
+                            height: 36,
+                          ),
+                        ),
+                      ),
+                      Text(
+                        "Or Sign in with",
+                        style: Theme.of(context).textTheme.labelSmall,
+                      ),
+                      Expanded(
+                        child: Container(
+                          margin: const EdgeInsets.only(left: 10, right: 10),
+                          child: const Divider(
+                            color: Colors.black,
+                            height: 36,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(
+                    height: 20,
+                  ),
+                  GestureDetector(
+                    onTap: () {},
+                    child: Container(
+                      height: 40,
+                      width: 40,
+                      color: Colors.white,
+                      child: SvgPicture.asset(AssestString.googleIcon),
+                    ),
                   ),
                   Flexible(flex: 1, child: Container()),
                   Row(
