@@ -1,16 +1,27 @@
-# login_bloc
+# Beginner-Friendly Authentication System
 
-A new Flutter project.
+## Project Overview
+This project is a beginner-friendly authentication system designed using Flutter and Firebase. The primary focus is on implementing fundamental authentication features using Flutter BLoC state management.
+
+## Features
+- **Email and Password Login**: Secure user login with email and password.
+- **Google Authentication**: Quick and easy sign-in with Google accounts.
+- **Password Reset**: Functionality to send password reset emails.
+- **User Registration**: Create new users with email and password.
+- **Logout Functionality**: Securely log out users after reaching the home screen.
+- **State Management**: Implemented using Flutter BLoC for efficient and scalable code.
+
+## Technologies Used
+- **Frontend**: Flutter
+- **State Management**: Flutter BLoC
+- **Backend**: Firebase Auth
 
 ## Getting Started
+### Prerequisites
+- Flutter SDK: [Install Flutter](https://flutter.dev/docs/get-started/install)
+- Firebase Account: [Create Firebase Project](https://firebase.google.com/)
 
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+### Installation
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/mohansriram-r/login_bloc-repo.git
