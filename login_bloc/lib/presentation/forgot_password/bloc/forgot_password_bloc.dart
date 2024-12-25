@@ -15,11 +15,13 @@ class ForgotPasswordBloc
 
   FutureOr<void> _sendMailButtonClicked(
       SendMailButtonClicked event, Emitter<ForgotPasswordState> emit) async {
-    if (event.email.isNotEmpty) {
-      await AuthService().resetPssword(
-        email: event.email,
-      );
+    String res = await AuthService().resetPssword(
+      email: event.email,
+    );
+    if (res == 'success') {
       emit(NavigationToLoginScreen());
+    } else {
+      emit(ForgotPasswordFailure(error: res));
     }
   }
 }

@@ -1,7 +1,30 @@
+AuthService
+
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  String getUser() {
+    String user = _auth.currentUser!.email.toString();
+    return user;
+  }
+
+  Future<void> resetPssword({required String email}) async {
+    await _auth.sendPasswordResetEmail(email: email);
+  }
+
+  Future<String> signOut() async {
+    String res = "";
+    try {
+      await _auth.signOut();
+      res = "Success";
+    } catch (e) {
+      res = e.toString();
+    }
+    return res;
+  }
 
   Future<String> login({
     required String email,
@@ -9,17 +32,18 @@ class AuthService {
   }) async {
     String res = '';
     try {
-      if (email.isNotEmpty || password.isNotEmpty) {
+      if (email.isNotEmpty && password.isNotEmpty) {
         await _auth.signInWithEmailAndPassword(
           email: email,
           password: password,
         );
-        res = 'sucess';
+
+        res = 'success';
+      } else {
+        res = 'Fill all the fields';
       }
-    } on FirebaseAuthException catch (e) {
-      if (e.code == 'invalid-email') {
-        res = 'invalid-email';
-      }
+    } catch (e) {
+      res = e.toString();
     }
     return res;
   }
@@ -30,14 +54,38 @@ class AuthService {
   }) async {
     String res = '';
     try {
-      if (email.isNotEmpty || password.isNotEmpty) {
+      if (email.isNotEmpty && password.isNotEmpty) {
         UserCredential userCredential =
             await _auth.createUserWithEmailAndPassword(
           email: email,
           password: password,
         );
-        res = 'sucess';
+        res = 'success';
+      } else {
+        res = 'Fill all the fields';
       }
+    } catch (e) {
+      res = e.toString();
+    }
+    return res;
+  }
+
+  Future<String> signInGoogle() async {
+    String res = '';
+    try {
+      final GoogleSignInAccount? gUser = await GoogleSignIn().signIn();
+      if (gUser == null) {
+        return "Google sign-in aborted";
+      }
+
+      final GoogleSignInAuthentication gAuth = await gUser!.authentication;
+
+      final credential = GoogleAuthProvider.credential(
+          accessToken: gAuth.accessToken, idToken: gAuth.idToken);
+
+      await _auth.signInWithCredential(credential);
+
+      res = "success";
     } catch (e) {
       res = e.toString();
     }
@@ -45,12 +93,84 @@ class AuthService {
   }
 }
 
+LoginBloc:
+
+import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:login_bloc/service/auth_service.dart';
+import 'package:meta/meta.dart';
+
+part 'login_event.dart';
+part 'login_state.dart';
+
+class LoginBloc extends Bloc<LoginEvent, LoginState> {
+  final AuthService _authService = AuthService();
+  LoginBloc() : super(LoginInitial()) {
+    on<SignUpButtonClicked>(_navigationToSignUpScreen);
+    on<LoginButtonClicked>(_loginButtonClicked);
+    on<ForgotPasswordButtonClicked>(_forgotPasswordButtonClicked);
+    on<GoogleSignInButtonClicked>(_googleSignInButtonClicked);
+  }
+
+  FutureOr<void> _navigationToSignUpScreen(
+    SignUpButtonClicked event,
+    Emitter<LoginState> emit,
+  ) {
+    emit(NavigationToSignUpScreen());
+  }
+
+  FutureOr<void> _googleSignInButtonClicked(
+    GoogleSignInButtonClicked event,
+    Emitter<LoginState> emit,
+  ) async {
+    String res = await _authService.signInGoogle();
+
+    if (res == 'success') {
+      emit(LoginSucess());
+    } else {
+      emit(LoginFailure(error: res));
+    }
+  }
+
+  FutureOr<void> _forgotPasswordButtonClicked(
+    ForgotPasswordButtonClicked event,
+    Emitter<LoginState> emit,
+  ) {
+    emit(ForgotPasswordState());
+  }
+
+  FutureOr<void> _loginButtonClicked(
+    LoginButtonClicked event,
+    Emitter<LoginState> emit,
+  ) async {
+    emit(LoginLoading());
+    String res = await _authService.login(
+      email: event.email,
+      password: event.password,
+    );
+
+    if (res == 'sucess') {
+      emit(LoginSucess());
+    } else {
+      emit(LoginFailure(error: res));
+    }
+  }
+}
+
+
+LoginScreen:
+
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:login_bloc/presentation/custom_wideget/text_field.dart';
+import 'package:login_bloc/presentation/forgot_password/forgot_password.dart';
+import 'package:login_bloc/presentation/home_screen/home_screen.dart';
 import 'package:login_bloc/presentation/login_screen/bloc/login_bloc.dart';
 import 'package:login_bloc/presentation/signup_screen/signup_screen.dart';
+import 'package:login_bloc/utils/constant/string.dart';
 import 'package:login_bloc/utils/helper/helper.dart';
 
 class LoginScreen extends StatelessWidget {
@@ -63,7 +183,13 @@ class LoginScreen extends StatelessWidget {
     return BlocConsumer<LoginBloc, LoginState>(
       listener: (context, state) {
         if (state is NavigationToSignUpScreen) {
-          _helper.navigationPush(context, const SignupScreen());
+          _helper.navigationPush(context, SignupScreen());
+        } else if (state is LoginFailure) {
+          _helper.showSnackBar(context, state.error);
+        } else if (state is LoginSucess) {
+          _helper.navigationPushReplacement(context, const HomeScreen());
+        } else if (state is ForgotPasswordState) {
+          _helper.navigationPush(context, const ForgotPassword());
         }
       },
       builder: (context, state) {
@@ -92,14 +218,28 @@ class LoginScreen extends StatelessWidget {
                   CTextField(
                     emailController: _emailController,
                     hintText: "Email",
-                    error: (state is LoginFailure) ? state.error : null,
                   ),
                   const SizedBox(height: 20),
                   CTextField(
                     emailController: _passwordController,
                     hintText: "Password",
                     isPass: true,
-                    error: (state is LoginFailure) ? state.error : null,
+                  ),
+                  const SizedBox(height: 10),
+                  Align(
+                    alignment: Alignment.bottomRight,
+                    child: GestureDetector(
+                      onTap: () {
+                        context
+                            .read<LoginBloc>()
+                            .add(ForgotPasswordButtonClicked());
+                      },
+                      child: Text(
+                        "Forgot Password?",
+                        style: Theme.of(context).textTheme.labelSmall,
+                        textAlign: TextAlign.end,
+                      ),
+                    ),
                   ),
                   const SizedBox(height: 20),
                   ElevatedButton(
@@ -112,6 +252,49 @@ class LoginScreen extends StatelessWidget {
                           );
                     },
                     child: const Text("Login"),
+                  ),
+                  const SizedBox(height: 20),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Container(
+                          margin: const EdgeInsets.only(left: 10, right: 10),
+                          child: const Divider(
+                            color: Colors.black,
+                            height: 36,
+                          ),
+                        ),
+                      ),
+                      Text(
+                        "Or Sign in with",
+                        style: Theme.of(context).textTheme.labelSmall,
+                      ),
+                      Expanded(
+                        child: Container(
+                          margin: const EdgeInsets.only(left: 10, right: 10),
+                          child: const Divider(
+                            color: Colors.black,
+                            height: 36,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(
+                    height: 20,
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      context
+                          .read<LoginBloc>()
+                          .add(GoogleSignInButtonClicked());
+                    },
+                    child: Container(
+                      height: 40,
+                      width: 40,
+                      color: Colors.white,
+                      child: SvgPicture.asset(AssestString.googleIcon),
+                    ),
                   ),
                   Flexible(flex: 1, child: Container()),
                   Row(
@@ -146,115 +329,3 @@ class LoginScreen extends StatelessWidget {
   }
 }
 
-import 'package:flutter/material.dart';
-
-class CTextField extends StatefulWidget {
-  const CTextField({
-    super.key,
-    required this.emailController,
-    this.isPass = false,
-    this.error,
-    this.passwordVisiable = false,
-    required this.hintText,
-  });
-
-  final TextEditingController emailController;
-  final bool isPass;
-  final String? error;
-  final bool passwordVisiable;
-  final String hintText;
-
-  @override
-  State<CTextField> createState() => _CTextFieldState();
-}
-
-class _CTextFieldState extends State<CTextField> {
-  late bool _isVisible;
-
-  @override
-  void initState() {
-    _isVisible = widget.passwordVisiable;
-    super.initState();
-  }
-
-  void _toggleVisibility() {
-    setState(() {
-      _isVisible = !_isVisible;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return TextField(
-      controller: widget.emailController,
-      keyboardType: widget.isPass
-          ? TextInputType.visiblePassword
-          : TextInputType.emailAddress,
-      obscureText: widget.isPass ? _isVisible : false,
-      decoration: InputDecoration(
-        hintText: widget.hintText,
-        hintStyle: Theme.of(context).textTheme.labelSmall,
-        errorText: widget.error,
-        filled: true,
-        border: const OutlineInputBorder(
-          borderSide: BorderSide(color: Colors.black),
-        ),
-        focusedBorder: const OutlineInputBorder(
-          borderSide: BorderSide(color: Colors.black),
-        ),
-        suffixIcon: widget.isPass
-            ? IconButton(
-                onPressed: () {
-                  _toggleVisibility();
-                },
-                icon: _isVisible
-                    ? const Icon(Icons.remove_red_eye_outlined)
-                    : const Icon(Icons.remove_red_eye_rounded),
-              )
-            : null,
-      ),
-    );
-  }
-}
-
-import 'dart:async';
-
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:login_bloc/service/auth_service.dart';
-import 'package:meta/meta.dart';
-
-part 'login_event.dart';
-part 'login_state.dart';
-
-class LoginBloc extends Bloc<LoginEvent, LoginState> {
-  final AuthService _authService = AuthService();
-  LoginBloc() : super(LoginInitial()) {
-    on<SignUpButtonClicked>(_navigationToSignUpScreen);
-    on<LoginButtonClicked>(_loginButtonClicked);
-  }
-
-  FutureOr<void> _navigationToSignUpScreen(
-    SignUpButtonClicked event,
-    Emitter<LoginState> emit,
-  ) {
-    emit(NavigationToSignUpScreen());
-  }
-
-  FutureOr<void> _loginButtonClicked(
-    LoginButtonClicked event,
-    Emitter<LoginState> emit,
-  ) async {
-    emit(LoginLoading());
-    String res = await _authService.createUser(
-      email: event.email,
-      password: event.password,
-    );
-
-    if (res == 'sucess') {
-      emit(LoginLoading());
-    } else {
-      emit(LoginFailure(error: res));
-    }
-  }
-}

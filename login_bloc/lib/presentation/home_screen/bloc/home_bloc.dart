@@ -9,10 +9,10 @@ part 'home_state.dart';
 
 class HomeBloc extends Bloc<HomeEvent, HomeState> {
   HomeBloc() : super(HomeInitial()) {
-    on<LogoutButtonClicked>(_loginButtonClicked);
+    on<LogoutButtonClicked>(_logOutButtonClicked);
   }
 
-  FutureOr<void> _loginButtonClicked(
+  FutureOr<void> _logOutButtonClicked(
     LogoutButtonClicked event,
     Emitter<HomeState> emit,
   ) async {

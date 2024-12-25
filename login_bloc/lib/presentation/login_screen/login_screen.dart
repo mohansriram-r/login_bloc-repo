@@ -120,7 +120,11 @@ class LoginScreen extends StatelessWidget {
                     height: 20,
                   ),
                   GestureDetector(
-                    onTap: () {},
+                    onTap: () {
+                      context
+                          .read<LoginBloc>()
+                          .add(GoogleSignInButtonClicked());
+                    },
                     child: Container(
                       height: 40,
                       width: 40,

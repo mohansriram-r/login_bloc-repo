@@ -14,6 +14,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     on<SignUpButtonClicked>(_navigationToSignUpScreen);
     on<LoginButtonClicked>(_loginButtonClicked);
     on<ForgotPasswordButtonClicked>(_forgotPasswordButtonClicked);
+    on<GoogleSignInButtonClicked>(_googleSignInButtonClicked);
   }
 
   FutureOr<void> _navigationToSignUpScreen(
@@ -21,6 +22,20 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     Emitter<LoginState> emit,
   ) {
     emit(NavigationToSignUpScreen());
+  }
+
+  FutureOr<void> _googleSignInButtonClicked(
+    GoogleSignInButtonClicked event,
+    Emitter<LoginState> emit,
+  ) async {
+    emit(LoginLoading());
+    String res = await _authService.signInGoogle();
+
+    if (res == 'success') {
+      emit(LoginSucess());
+    } else {
+      emit(LoginFailure(error: res));
+    }
   }
 
   FutureOr<void> _forgotPasswordButtonClicked(
