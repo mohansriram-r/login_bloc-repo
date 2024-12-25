@@ -24,7 +24,7 @@ class SignupBloc extends Bloc<SignupEvent, SignupState> {
       password: event.password,
     );
 
-    if (res == 'sucess') {
+    if (res == 'success') {
       emit(SignupSucess());
     } else {
       emit(SignupFailure(error: res));
